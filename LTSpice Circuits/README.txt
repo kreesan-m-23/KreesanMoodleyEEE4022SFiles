@@ -1,0 +1,4 @@
+- The 'Transmit Line' circuit excludes the circuit which drives the speaker as the circuits functionality can not be shown on LTSpice. 
+- The 'Receive Line' circuit excludes the microphone driving circuit and the microphone was simulated as an AC input signal.
+- The 'Receive Line' circuit also shows different resistor values around the voltage clipping section as the diodes used has a 0.38 V drop and the diodes in LTSpice have an approximate voltage drop 0f 0.6 V. Simulations were done suing values which matched the 0.6 V to validate the logic behind the circuit construction.
+- Values of resistors were chosen according to the E12 series available and circuits are shown with these values instead of ideal values.

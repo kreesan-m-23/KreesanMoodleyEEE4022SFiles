@@ -1,0 +1,13 @@
+- one_a.m - Define Parameters and Plot Transmit Pulse.
+- one_b.m - Generate, Transmit and Record Chirp Signal and Bandpass Filter.
+- two.m - Down-mixing of Chirp Signal.
+- three.m - Lowpass Filtering After Down-mixing.
+- four_time_domain.m - Matched Filtering in Time-domain.
+- four_frequency_domain.m - Matched Filtering in Frequency-domain.
+- five.m - Create Multiple Pulses.
+- six.m - Generate Matrix Plot of Range Lines.
+- seven.m - Generate Range-Doppler Map.
+- complete_radar.m - Working Acoustic Radar Programme.
+- rect.m - Function to Generate ‘rect’ function to Assist in Generating Signals.
+- Speaker_Test.m - Test Output of Speaker and Transmit Line of Jammer System.
+- Mic_Test.m - Test Output of Microphone of Jammer System.

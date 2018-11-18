@@ -72,21 +72,27 @@ static void MX_ADC1_Init(void);
 	uint16_t length_of_array = 60000; // Length of Arrays to be Referenced
 	uint16_t adc_val[60000]; // Array to Store Incoming Pulses Using the ADC
 	uint16_t adc_counter = 0; // Counter to Reference ADC Array
+	
 	uint16_t target_one[60000]; // Array to Reference to Simulate False Target One
 	uint16_t target_one_counter = 0; // Counter to Refernce False Target One's Array
 	uint16_t target_one_delay_counter = 0; // Counter to Create Desired Delay to Insert False Target One
-	uint16_t target_one_delay = (int)1*1749; // First Delay of 0.5 meters. Delay in samples for 1 meter delay = ((2*1)/343)[(m)/(m/s)]*(samples/s)
+	uint16_t target_one_delay = (int)2*1749; // First Delay of 2 meters. Delay in samples for 1 meter delay = ((2*1)/343)[(m)/(m/s)]*(samples/s)
+	
 	uint16_t target_two[60000]; // Array to Reference to Simulate False Target Two
 	uint16_t target_two_counter = 0; // Counter to Refernce False Target Two's Array
 	uint16_t target_two_delay_counter = 0; // Counter to Create Desired Delay to Insert False Target Two
-	uint16_t target_two_delay = (int)2*1749; // First Delay of 1.5 meters. Delay in samples for 1 meter delay = ((2*1)/343)[(m)/(m/s)]*(samples/s)
-	uint16_t target_one_delay_array[3] = {(int)1*1749, (int)3*1749,(int)4*1749}; // Changing Delays of False Target One
-	uint8_t target_one_delay_array_indexer = 0; // Counter to Track Selected Delay of False Target One
-	uint16_t target_two_delay_array[3] = {(int)2*1749,(int)4*1749, (int)5*1749}; // Changing Delays of False Target One
-	uint8_t target_two_delay_array_indexer = 0; // Counter to Track Selected Delay of False Target One
-	uint32_t delay_changer = 0; // Counter to Change Desired Locations of False Targets Periodically
+	uint16_t target_two_delay = (int)4*1749; // First Delay of 4 meters. Delay in samples for 1 meter delay = ((2*1)/343)[(m)/(m/s)]*(samples/s)
+	
 	uint8_t alternator = 0; // Selector to Choose Whether False Target One or Two Gets Sampled Out of the DAC
 	uint8_t target_selector = 0; // Selector to Choose Whether Stationary, Approaching or Receding False Targets Get Sampled Out of the DAC
+	
+	uint16_t target_one_delay_array[3] = {(int)2*1749, (int)2*1749,(int)2*1749}; // Changing Delays of False Target One
+	uint8_t target_one_delay_array_indexer = 0; // Counter to Track Selected Delay of False Target One
+	
+	uint16_t target_two_delay_array[3] = {(int)4*1749,(int)4*1749, (int)4*1749}; // Changing Delays of False Target One
+	uint8_t target_two_delay_array_indexer = 0; // Counter to Track Selected Delay of False Target One
+	
+	uint32_t delay_changer = 0; // Counter to Change Desired Locations of False Targets Periodically
 	
 	uint16_t adc_val_current = 0; // Current ADC Sample to be Checked in Order to Know When to Send Pulses to Insert Moving False Targets
 	
@@ -101,7 +107,7 @@ static void MX_ADC1_Init(void);
 	uint16_t delay_receding = 0; // Delay to Insert Receding False Target at Desired Radial Velocity
 	uint16_t delay_counter_receding = 0; // Counter for Delay to Acheive Desired Radial Velocity of False Target
 	uint16_t pulse_counter_receding = 0; // Counter to Keep Track of How Many Pulses were Transmitted
-	
+
 	uint16_t pulse[3000] = {1775, // Pulse Sampled at 100 kHz
 2432,
 2927,
@@ -3103,7 +3109,7 @@ static void MX_ADC1_Init(void);
 412,
 840,
 };
-	
+
 /* USER CODE END 0 */
 
 /**
@@ -3374,7 +3380,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 			target_two_delay_counter --;
 		}
 		
-		// Insert One False Target One
+		// Insert One False Target
 		else if ((target_one_delay_counter == target_one_delay) && (target_two_delay_counter != target_two_delay)){
 			HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R, adc_val[target_one_counter]);
 			target_one_counter ++;
@@ -3415,37 +3421,17 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 	
 	else if (target_selector == 1){ // Insert Approaching False Target in Radar System
 		target_selector = 2;
-		
+
 		target_one_counter ++;
 		if (target_one_counter == length_of_array){target_one_counter = 0;}
 		target_two_counter ++;
 		if (target_two_counter == length_of_array){target_two_counter = 0;}
 		
-		if ((target_one_delay_counter < target_one_delay) && (target_two_delay_counter < target_two_delay)){
-			target_one_delay_counter ++;
-			target_two_delay_counter ++;
-		}
-		
-		else if ((target_one_delay_counter < target_one_delay) && (target_two_delay_counter > target_two_delay)){
-			target_one_delay_counter ++;
-			target_two_delay_counter --;
-		}
-		
-		else if ((target_one_delay_counter > target_one_delay) && (target_two_delay_counter < target_two_delay)){
-			target_one_delay_counter --;
-			target_two_delay_counter ++;
-		}
-		
-		else if ((target_one_delay_counter > target_one_delay) && (target_two_delay_counter > target_two_delay)){
-			target_one_delay_counter --;
-			target_two_delay_counter --;
-		}
-		
 		if (adc_val_current > 3000){
 		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, 1);
 		
 		delay_approaching = (int)(100000*(0.03-(0.000011 * 1))); // (*insert speed in cm/s here* * 1). 2.5 cm/s = 0.000001 5 cm/s = 0.000011 10 cm/s = 0.000024. Found Empirically.
-		if (once_off_delay_approaching == (int)((3.3+7) * 583.09)){ // (3.3 + *insert desired distance here*). Found Empirically.
+		if (once_off_delay_approaching == (int)((3.3+4) * 583.09)){ // (3.3 + *insert desired distance here*). Found Empirically.
 			if (delay_counter_approaching == delay_approaching){
 				HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R, pulse[pulse_counter_approaching]);
 				pulse_counter_approaching ++;
@@ -3479,32 +3465,13 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 		if (target_one_counter == length_of_array){target_one_counter = 0;}
 		target_two_counter ++;
 		if (target_two_counter == length_of_array){target_two_counter = 0;}
-		
-		if ((target_one_delay_counter < target_one_delay) && (target_two_delay_counter < target_two_delay)){
-			target_one_delay_counter ++;
-			target_two_delay_counter ++;
-		}
-		
-		else if ((target_one_delay_counter < target_one_delay) && (target_two_delay_counter > target_two_delay)){
-			target_one_delay_counter ++;
-			target_two_delay_counter --;
-		}
-		
-		else if ((target_one_delay_counter > target_one_delay) && (target_two_delay_counter < target_two_delay)){
-			target_one_delay_counter --;
-			target_two_delay_counter ++;
-		}
-		
-		else if ((target_one_delay_counter > target_one_delay) && (target_two_delay_counter > target_two_delay)){
-			target_one_delay_counter --;
-			target_two_delay_counter --;
-		}
+
 		
 		if (adc_val_current > 3000){
 		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, 1);
 		
 		delay_receding = (int)(100000*(0.03+(0.000020* 1))); // (*insert speed in cm/s here* * 1). -2.5 cm/s = 0.000010 -5 cm/s = 0.000020 -10 cm/s = 0.000030. Found Empirically.
-		if (once_off_delay_receding == (int)((3.3+7)*583.09)){ // (3.3 + *insert desired distance here*). Found Empirically.
+		if (once_off_delay_receding == (int)((3.3+4)*583.09)){ // (3.3 + *insert desired distance here*). Found Empirically.
 			if (delay_counter_receding == delay_receding){
 				HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R, pulse[pulse_counter_receding]);
 				pulse_counter_receding ++;
@@ -3533,7 +3500,6 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 	// Change Location of False Target Every 10 Seconds
 	if (delay_changer == (3000000 - 1)){
 		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_13);
-		
 		target_one_delay = target_one_delay_array[target_one_delay_array_indexer];
 		target_one_delay_array_indexer ++;
 		if (target_one_delay_array_indexer == 3){target_one_delay_array_indexer = 0;}
@@ -3541,11 +3507,10 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 		target_two_delay = target_two_delay_array[target_two_delay_array_indexer];
 		target_two_delay_array_indexer ++;
 		if (target_two_delay_array_indexer == 3){target_two_delay_array_indexer = 0;}
-		
+	
 		delay_changer = 0;
 	}
 	else {delay_changer ++;}
-	
 }
 /* USER CODE END 4 */
 

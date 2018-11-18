@@ -3421,26 +3421,6 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 		target_two_counter ++;
 		if (target_two_counter == length_of_array){target_two_counter = 0;}
 		
-		if ((target_one_delay_counter < target_one_delay) && (target_two_delay_counter < target_two_delay)){
-			target_one_delay_counter ++;
-			target_two_delay_counter ++;
-		}
-		
-		else if ((target_one_delay_counter < target_one_delay) && (target_two_delay_counter > target_two_delay)){
-			target_one_delay_counter ++;
-			target_two_delay_counter --;
-		}
-		
-		else if ((target_one_delay_counter > target_one_delay) && (target_two_delay_counter < target_two_delay)){
-			target_one_delay_counter --;
-			target_two_delay_counter ++;
-		}
-		
-		else if ((target_one_delay_counter > target_one_delay) && (target_two_delay_counter > target_two_delay)){
-			target_one_delay_counter --;
-			target_two_delay_counter --;
-		}
-		
 		if (adc_val_current > 3000){
 		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, 1);
 		
@@ -3479,26 +3459,6 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 		if (target_one_counter == length_of_array){target_one_counter = 0;}
 		target_two_counter ++;
 		if (target_two_counter == length_of_array){target_two_counter = 0;}
-		
-		if ((target_one_delay_counter < target_one_delay) && (target_two_delay_counter < target_two_delay)){
-			target_one_delay_counter ++;
-			target_two_delay_counter ++;
-		}
-		
-		else if ((target_one_delay_counter < target_one_delay) && (target_two_delay_counter > target_two_delay)){
-			target_one_delay_counter ++;
-			target_two_delay_counter --;
-		}
-		
-		else if ((target_one_delay_counter > target_one_delay) && (target_two_delay_counter < target_two_delay)){
-			target_one_delay_counter --;
-			target_two_delay_counter ++;
-		}
-		
-		else if ((target_one_delay_counter > target_one_delay) && (target_two_delay_counter > target_two_delay)){
-			target_one_delay_counter --;
-			target_two_delay_counter --;
-		}
 		
 		if (adc_val_current > 3000){
 		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, 1);
